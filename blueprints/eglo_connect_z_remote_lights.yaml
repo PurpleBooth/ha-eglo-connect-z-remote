@@ -13,7 +13,7 @@ blueprint:
     the remote's trigger list provides them.
   domain: automation
   author: Billie
-  source_url: https://raw.githubusercontent.com/PurpleBooth/ha-eglo-connect.z-smart-home-fernbedienung-2.0/main/blueprints/eglo_connect_z_remote_lights.yaml
+  source_url: https://raw.githubusercontent.com/PurpleBooth/ha-eglo-connect-z-remote/main/blueprints/eglo_connect_z_remote_lights.yaml
   homeassistant:
     min_version: "2024.10.0"
   input:

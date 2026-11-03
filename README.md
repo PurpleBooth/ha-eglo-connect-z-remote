@@ -27,7 +27,7 @@ are on the device info card. The command map was validated against Zigbee2MQTT's
 ## Installation (HACS)
 
 1. **Custom repository**: HACS → ⋮ → *Custom repositories* → add
-   `https://github.com/PurpleBooth/ha-eglo-connect.z-smart-home-fernbedienung-2.0`
+   `https://github.com/PurpleBooth/ha-eglo-connect-z-remote`
    with category *Integration*.
 2. Install **EGLO connect.z Fernbedienung 2.0**, then **restart Home
    Assistant**.

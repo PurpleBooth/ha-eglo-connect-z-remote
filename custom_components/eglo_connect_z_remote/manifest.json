@@ -1,12 +1,14 @@
 {
   "domain": "eglo_connect_z_remote",
   "name": "EGLO connect.z Fernbedienung 2.0",
-  "codeowners": ["@billie"],
+  "codeowners": [
+    "@billie"
+  ],
   "config_flow": true,
-  "documentation": "https://github.com/PurpleBooth/ha-eglo-connect.z-smart-home-fernbedienung-2.0",
+  "documentation": "https://github.com/PurpleBooth/ha-eglo-connect-z-remote",
   "integration_type": "hub",
   "iot_class": "local_push",
-  "issue_tracker": "https://github.com/PurpleBooth/ha-eglo-connect.z-smart-home-fernbedienung-2.0/issues",
+  "issue_tracker": "https://github.com/PurpleBooth/ha-eglo-connect-z-remote/issues",
   "requirements": [],
   "version": "1.0.0"
 }
