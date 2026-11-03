@@ -1,0 +1,222 @@
+blueprint:
+  name: EGLO connect.z Fernbedienung 2.0 — lights
+  description: >-
+    Control lights with the EGLO connect.z Fernbedienung 2.0 (AwoX
+    ERCU_3groups_Zm / EGLO 99099) using ZHA device triggers.
+
+    On = on, Off = off, short dim presses step brightness, long dim presses
+    dim up/down fully, Refresh sets 100 % warm white, Favourite 1/2 run
+    optional actions.
+
+    Buttons not covered here (colours, colour temperature, Refresh coloured,
+    long favourites) can be used as normal device triggers in any automation —
+    the remote's trigger list provides them.
+  domain: automation
+  author: Billie
+  source_url: https://raw.githubusercontent.com/PurpleBooth/ha-eglo-connect-z-remote/main/blueprints/eglo_connect_z_remote_lights.yaml
+  homeassistant:
+    min_version: "2024.10.0"
+  input:
+    remote:
+      name: Remote control
+      description: The EGLO connect.z Fernbedienung 2.0 (ZHA device).
+      selector:
+        device:
+          filter:
+            - integration: zha
+              manufacturer: AwoX
+              model: ERCU_3groups_Zm
+          multiple: false
+    lights:
+      name: Lights
+      icon: mdi:lightbulb-group
+      input:
+        turn_on_target:
+          name: Turn on
+          description: Lights controlled by the On button.
+          default: {}
+          selector:
+            target:
+              entity:
+                domain: light
+        turn_off_target:
+          name: Turn off
+          description: Lights controlled by the Off button.
+          default: {}
+          selector:
+            target:
+              entity:
+                domain: light
+        dim_target:
+          name: Dimming
+          description: Lights controlled by the dim buttons.
+          default: {}
+          selector:
+            target:
+              entity:
+                domain: light
+        refresh_target:
+          name: Refresh button
+          description: Lights set to full brightness by the Refresh button.
+          default: {}
+          selector:
+            target:
+              entity:
+                domain: light
+    actions:
+      name: Favourite buttons
+      icon: mdi:star-four-points
+      collapsed: true
+      input:
+        favorite_1_action:
+          name: Favourite 1
+          description: Optional actions for a short press of Favourite 1.
+          default: []
+          selector:
+            action:
+        favorite_2_action:
+          name: Favourite 2
+          description: Optional actions for a short press of Favourite 2.
+          default: []
+          selector:
+            action:
+    settings:
+      name: Settings
+      icon: mdi:cog
+      collapsed: true
+      input:
+        brightness_step:
+          name: Brightness step
+          description: Percentage added/removed by a short dim press.
+          default: 20
+          selector:
+            number:
+              min: 1
+              max: 50
+              unit_of_measurement: "%"
+
+mode: single
+max_exceeded: silent
+
+variables:
+  brightness_step: !input brightness_step
+
+triggers:
+  - platform: device
+    domain: zha
+    device_id: !input remote
+    type: remote_button_short_press
+    subtype: turn_on
+    id: on
+  - platform: device
+    domain: zha
+    device_id: !input remote
+    type: remote_button_short_press
+    subtype: turn_off
+    id: off
+  - platform: device
+    domain: zha
+    device_id: !input remote
+    type: remote_button_short_press
+    subtype: dim_up
+    id: dim_up_step
+  - platform: device
+    domain: zha
+    device_id: !input remote
+    type: remote_button_short_press
+    subtype: dim_down
+    id: dim_down_step
+  - platform: device
+    domain: zha
+    device_id: !input remote
+    type: remote_button_long_press
+    subtype: dim_up
+    id: dim_up_move
+  - platform: device
+    domain: zha
+    device_id: !input remote
+    type: remote_button_long_press
+    subtype: dim_down
+    id: dim_down_move
+  - platform: device
+    domain: zha
+    device_id: !input remote
+    type: remote_button_short_press
+    subtype: refresh
+    id: refresh
+  - platform: device
+    domain: zha
+    device_id: !input remote
+    type: remote_button_short_press
+    subtype: favorite_1
+    id: favorite_1
+  - platform: device
+    domain: zha
+    device_id: !input remote
+    type: remote_button_short_press
+    subtype: favorite_2
+    id: favorite_2
+
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id: on
+        sequence:
+          - action: light.turn_on
+            target: !input turn_on_target
+      - conditions:
+          - condition: trigger
+            id: off
+        sequence:
+          - action: light.turn_off
+            target: !input turn_off_target
+      - conditions:
+          - condition: trigger
+            id: dim_up_step
+        sequence:
+          - action: light.turn_on
+            target: !input dim_target
+            data:
+              brightness_step_pct: "{{ brightness_step }}"
+      - conditions:
+          - condition: trigger
+            id: dim_down_step
+        sequence:
+          - action: light.turn_on
+            target: !input dim_target
+            data:
+              brightness_step_pct: "{{ brightness_step * -1 }}"
+      - conditions:
+          - condition: trigger
+            id: dim_up_move
+        sequence:
+          - action: light.turn_on
+            target: !input dim_target
+            data:
+              brightness_pct: 100
+      - conditions:
+          - condition: trigger
+            id: dim_down_move
+        sequence:
+          - action: light.turn_on
+            target: !input dim_target
+            data:
+              brightness_pct: 1
+      - conditions:
+          - condition: trigger
+            id: refresh
+        sequence:
+          - action: light.turn_on
+            target: !input refresh_target
+            data:
+              brightness_pct: 100
+              color_temp_kelvin: 2700
+      - conditions:
+          - condition: trigger
+            id: favorite_1
+        sequence: !input favorite_1_action
+      - conditions:
+          - condition: trigger
+            id: favorite_2
+        sequence: !input favorite_2_action

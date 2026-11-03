@@ -1,0 +1,9 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "description": "Registers the ZHA quirk for the EGLO connect.z Fernbedienung 2.0 (AwoX ERCU_3groups_Zm / EGLO 99099). The remote itself is added through the ZHA integration — this entry only makes its buttons usable as device triggers."
+      }
+    }
+  }
+}
