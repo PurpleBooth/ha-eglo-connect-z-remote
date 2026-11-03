@@ -112,23 +112,24 @@ class TestBrightness:
 
 
 class TestColorTemperature:
-    def test_step_mode_1_is_down(self):
+    def test_step_mode_1_is_up(self):
+        """Live-verified on this hardware: mode 1 is the user's up button."""
         result = translate(
             CLUSTER_COLOR,
             "step_color_temp",
             args=[1, 32, 2],
             params={"step_mode": 1, "step_size": 32, "transition_time": 2},
         )
-        assert result == {"action": "color_temperature_step_down"}
+        assert result == {"action": "color_temperature_step_up"}
 
-    def test_step_mode_3_is_up(self):
+    def test_step_mode_3_is_down(self):
         result = translate(
             CLUSTER_COLOR,
             "step_color_temp",
             args=[3, 32, 2],
             params={"step_mode": 3, "step_size": 32, "transition_time": 2},
         )
-        assert result == {"action": "color_temperature_step_up"}
+        assert result == {"action": "color_temperature_step_down"}
 
     def test_move_to_color_temp_warm(self):
         result = translate(
@@ -325,8 +326,8 @@ class TestSpuriousOnSuppression:
         color_event = {
             "cluster_id": CLUSTER_COLOR,
             "command": "step_color_temp",
-            "args": [3, 32, 2],
-            "params": {"step_mode": 3, "step_size": 32, "transition_time": 2},
+            "args": [1, 32, 2],
+            "params": {"step_mode": 1, "step_size": 32, "transition_time": 2},
         }
         assert translate_zha_event(color_event, state) == {
             "action": "color_temperature_step_up"

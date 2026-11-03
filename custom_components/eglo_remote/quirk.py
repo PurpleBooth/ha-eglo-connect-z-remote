@@ -79,9 +79,12 @@ COLOR_BY_BYTE = {
 
 # Long presses move to hue/saturation instead of the raw vendor command.
 
-# step_color_temp step modes are vendor-specific: 1 = warmer, 3 = colder.
-TEMP_STEP_WARM = 1
-TEMP_STEP_COLD = 3
+# step_color_temp step modes are vendor-specific; on this hardware mode 1 is
+# the warmer/colder button the user calls "up" (verified live 2026-11-03: the
+# remote's up button sends step_mode 1). Note the value-to-direction mapping
+# is inverted versus the Zigbee2MQTT converter's comment.
+TEMP_STEP_UP = 1
+TEMP_STEP_DOWN = 3
 
 # enhanced_move_hue move modes: 1 = short press, 3 = long press of the
 # colour-cycle button; the older move_hue reports mode 1 with rate 12.
@@ -238,12 +241,12 @@ class EgloColorCluster(EgloShimMixin, EventableCluster, Color):
             return True
 
         if name == "step_color_temp":
-            if args.step_mode not in (TEMP_STEP_WARM, TEMP_STEP_COLD):
+            if args.step_mode not in (TEMP_STEP_UP, TEMP_STEP_DOWN):
                 return False
             self._eglo_mark_action()
             self._eglo_emit(
                 "color_temperature_step_up"
-                if args.step_mode == TEMP_STEP_COLD
+                if args.step_mode == TEMP_STEP_UP
                 else "color_temperature_step_down"
             )
             return True

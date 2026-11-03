@@ -217,12 +217,13 @@ def translate_zha_event(
     elif cluster_id == CLUSTER_COLOR:
         if command == "step_color_temp":
             # This remote reports step mode 1 for one direction and 3 for the
-            # other, inverted versus the ZCL direction assignment. The
-            # Zigbee2MQTT converter observed 1 = down, 3 = up.
+            # other, inverted versus the ZCL direction assignment. Verified
+            # live on this hardware: 1 = the user's "up" button, 3 = down
+            # (the Zigbee2MQTT converter comment says the opposite).
             step_mode = params.get("step_mode", _arg(args, 0))
             action = (
                 "color_temperature_step_up"
-                if step_mode == 3
+                if step_mode == 1
                 else "color_temperature_step_down"
             )
             state.mark_non_on()

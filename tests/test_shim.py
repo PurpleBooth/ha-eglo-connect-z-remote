@@ -309,17 +309,18 @@ class TestDimmingButtons:
 
 
 class TestColourTemperatureButtons:
-    def test_step_warm_is_down(self, remote, capture):
+    def test_step_mode_1_is_up(self, remote, capture):
+        """Live-verified: the remote's up button sends step_mode 1."""
         press(
             remote, 0x300, bytes([0x4C, 0x01]) + u16(51) + u16(0) + u16(153) + u16(454)
         )
-        assert capture.names == ["color_temperature_step_down"]
+        assert capture.names == ["color_temperature_step_up"]
 
-    def test_step_cold_is_up(self, remote, capture):
+    def test_step_mode_3_is_down(self, remote, capture):
         press(
             remote, 0x300, bytes([0x4C, 0x03]) + u16(51) + u16(0) + u16(153) + u16(454)
         )
-        assert capture.names == ["color_temperature_step_up"]
+        assert capture.names == ["color_temperature_step_down"]
 
     def test_move_to_color_temp(self, remote, capture):
         press(remote, 0x300, bytes([0x0A]) + u16(454) + u16(0))

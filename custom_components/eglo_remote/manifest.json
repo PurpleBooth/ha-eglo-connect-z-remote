@@ -1,12 +1,14 @@
 {
   "domain": "eglo_remote",
   "name": "EGLO connect.z Remote",
-  "codeowners": ["@PurpleBooth"],
+  "codeowners": [
+    "@PurpleBooth"
+  ],
   "config_flow": true,
   "documentation": "https://tangled.org/billie.codes/ha-eglo-connect.z-smart-home-fernbedienung-2.0",
   "integration_type": "device",
   "iot_class": "local_push",
   "issue_tracker": "https://tangled.org/billie.codes/ha-eglo-connect.z-smart-home-fernbedienung-2.0/issues",
   "requirements": [],
-  "version": "0.2.0"
+  "version": "0.2.1"
 }
