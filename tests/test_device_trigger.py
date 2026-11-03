@@ -33,7 +33,11 @@ async def test_triggers_are_offered_on_the_remote_device(hass, own_device):
     for trigger in ours:
         assert trigger[CONF_PLATFORM] == "device"
         assert trigger[CONF_DEVICE_ID] == own_device.id
-        assert trigger[CONF_TYPE] in ("button_short_press", "button_long_press")
+        assert trigger[CONF_TYPE] in (
+            "button_short_press",
+            "button_long_press",
+            "zone_selected",
+        )
 
 
 async def test_attach_trigger_fires_on_matching_action(hass, own_device):

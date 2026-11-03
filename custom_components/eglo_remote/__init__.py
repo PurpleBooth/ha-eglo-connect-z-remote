@@ -10,8 +10,9 @@ from __future__ import annotations
 import logging
 from collections.abc import Callable
 
-from homeassistant.config_entries import ConfigEntry
+from homeassistant.config_entries import ConfigEntry, ConfigEntryState
 from homeassistant.core import Event, HomeAssistant, callback
+from homeassistant.helpers import issue_registry as ir
 
 from .const import (
     ATTR_DEVICE_IEEE,
@@ -19,11 +20,59 @@ from .const import (
     DOMAIN,
     EVENT_REMOTE_ACTION,
     PLATFORMS,
+    ZHA_DOMAIN,
     ZHA_EVENT,
 )
 from .translator import TranslationState, translate_zha_event
 
 _LOGGER = logging.getLogger(__name__)
+
+SHIM_RESTART_ISSUE = "shim_needs_restart"
+
+_shim_registered = False
+
+
+def _register_shim() -> None:
+    """Import the quirk shim and drain zha-quirks' pending registry.
+
+    Importing :mod:`quirk` defines the shim device class, whose
+    ``__init_subclass__`` queues it into zha-quirks' pending registry; the
+    drain makes ZHA match the paired remote on its next (re)initialization.
+    """
+    global _shim_registered
+    if _shim_registered:
+        return
+    import zhaquirks
+
+    from . import quirk  # noqa: F401  (registration side effect)
+
+    zhaquirks.setup()
+    _shim_registered = True
+    _LOGGER.info("EGLO remote quirk shim registered with zha-quirks")
+
+
+async def _async_register_shim(hass: HomeAssistant) -> None:
+    """Register the shim off the event loop and report the outcome."""
+    zha_entries = hass.config_entries.async_entries(ZHA_DOMAIN)
+    zha_already_loaded = bool(zha_entries) and (
+        zha_entries[0].state is ConfigEntryState.LOADED
+    )
+
+    await hass.async_add_executor_job(_register_shim)
+
+    if zha_already_loaded:
+        # The remote is already running without the shim; it only picks the
+        # shim up on its next initialization, which a restart triggers.
+        ir.async_create_issue(
+            hass,
+            DOMAIN,
+            SHIM_RESTART_ISSUE,
+            is_fixable=False,
+            severity=ir.IssueSeverity.WARNING,
+            translation_key=SHIM_RESTART_ISSUE,
+        )
+    else:
+        ir.async_delete_issue(hass, DOMAIN, SHIM_RESTART_ISSUE)
 
 
 class RemoteController:
@@ -74,6 +123,7 @@ class RemoteController:
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up an EGLO remote from a config entry."""
+    await _async_register_shim(hass)
     controller = RemoteController(hass, entry)
     await controller.async_setup()
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = controller

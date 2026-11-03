@@ -32,12 +32,14 @@ from .translator import (
     ACTION_DEFINITIONS,
     GESTURE_LONG,
     GESTURE_SHORT,
+    GESTURE_ZONE,
     ActionDefinition,
 )
 
 GESTURE_TRIGGER_TYPES = {
     GESTURE_SHORT: "button_short_press",
     GESTURE_LONG: "button_long_press",
+    GESTURE_ZONE: "zone_selected",
 }
 TRIGGER_TYPE_GESTURES = {
     trigger_type: gesture for gesture, trigger_type in GESTURE_TRIGGER_TYPES.items()

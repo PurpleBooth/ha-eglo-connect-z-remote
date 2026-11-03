@@ -26,7 +26,8 @@
   "device_automation": {
     "trigger_type": {
       "button_short_press": "gedrückt",
-      "button_long_press": "gedrückt halten"
+      "button_long_press": "gedrückt halten",
+      "zone_selected": "gewählt"
     },
     "trigger_subtype": {
       "turn_on": "Einschalten",
@@ -44,7 +45,14 @@
       "refresh": "Refresh (Kerzenmodus)",
       "color_cycle": "Farbwechsel",
       "group_1": "Gruppe 1",
-      "group_2": "Gruppe 2"
+      "group_2": "Gruppe 2",
+      "zone": "Zone"
+    }
+  },
+  "issues": {
+    "shim_needs_restart": {
+      "title": "Home Assistant neu starten, um Farb- und Zonen-Funktionen zu aktivieren",
+      "description": "Der EGLO-Fernbedienungsshim wurde registriert, während der Zigbee-Stapel bereits lief, daher arbeitet die Fernbedienung noch ohne ihn. Starte Home Assistant neu; danach funktionieren die Farbtasten, die Refresh-Taste und das Zonen-Attribut. Erscheint der Hinweis nach einem Neustart erneut, starte noch einmal neu."
     }
   }
 }

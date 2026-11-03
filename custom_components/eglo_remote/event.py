@@ -9,10 +9,10 @@ from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .const import (
-    ATTR_ACTION_GROUP,
     ATTR_COLOR_TEMPERATURE,
     ATTR_DEVICE_IEEE,
     ATTR_LEVEL,
+    ATTR_ZONE,
     CONF_IEEE,
     CONF_MODEL,
     DOMAIN,
@@ -21,7 +21,7 @@ from .const import (
 )
 from .translator import ACTION_NAMES
 
-PAYLOAD_KEYS = (ATTR_ACTION_GROUP, ATTR_LEVEL, ATTR_COLOR_TEMPERATURE)
+PAYLOAD_KEYS = (ATTR_ZONE, ATTR_LEVEL, ATTR_COLOR_TEMPERATURE)
 
 
 def _device_name(ieee: str) -> str:

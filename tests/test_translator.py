@@ -53,7 +53,7 @@ class TestOnOff:
 
     def test_group_id_becomes_action_group(self):
         result = translate(CLUSTER_ON_OFF, "on", group_id=32778)
-        assert result == {"action": "on", "action_group": 1}
+        assert result == {"action": "on", "zone": 1}
 
     def test_small_group_id_is_ignored(self):
         assert translate(CLUSTER_ON_OFF, "on", group_id=0) == {"action": "on"}
@@ -257,6 +257,44 @@ class TestFavorites:
             translate(CLUSTER_SCENES, "recall", args=[0, 3], params={"scene_id": 3})
             is None
         )
+
+
+class TestShimEvents:
+    """Events emitted by the quirk shim (command `eglo_action`)."""
+
+    def shim(self, action, **extra):
+        return translate(0x0006, "eglo_action", args={"action": action, **extra})
+
+    def test_relay_with_zone(self):
+        assert self.shim("on", zone=2) == {"action": "on", "zone": 2}
+
+    def test_relay_with_level(self):
+        assert self.shim("brightness_move_to_level", level=254, zone=1) == {
+            "action": "brightness_move_to_level",
+            "zone": 1,
+            "level": 254,
+        }
+
+    def test_relay_with_color_temperature(self):
+        assert self.shim("color_temperature_move", color_temperature=454) == {
+            "action": "color_temperature_move",
+            "color_temperature": 454,
+        }
+
+    def test_zone_selected_action(self):
+        assert self.shim("zone_selected", zone=3) == {
+            "action": "zone_selected",
+            "zone": 3,
+        }
+
+    def test_invalid_action_is_ignored(self):
+        assert self.shim("not_a_real_action") is None
+
+    def test_missing_action_is_ignored(self):
+        assert translate(0x0006, "eglo_action", args={"zone": 2}) is None
+
+    def test_list_args_are_ignored(self):
+        assert translate(0x0006, "eglo_action", args=[1, 2]) is None
 
 
 class TestSpuriousOnSuppression:

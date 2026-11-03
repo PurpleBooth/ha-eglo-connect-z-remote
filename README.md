@@ -18,6 +18,13 @@ exposes every button as:
 
 Works fully locally. No MQTT broker, no Zigbee2MQTT, no cloud.
 
+Under the hood the integration registers a small ZHA quirk shim that makes
+the remote's vendor-specific Zigbee commands parseable and re-emits every
+press as one canonical event, and translates both those events and the
+standard ones into actions. When the shim is not yet active (for example
+before the first restart after installing), everything except the colour
+and refresh buttons still works from the plain ZHA events.
+
 ## Supported hardware
 
 | Device page shows                  | Supported |
@@ -37,6 +44,8 @@ Home Assistant 2024.8 or newer is required (event entities).
 3. Settings > Devices & services > **Add integration** > **EGLO connect.z
    Remote** and pick your remote from the list. The remote must already be
    paired with ZHA.
+4. Restart Home Assistant once if a repair hint asks for it: the quirk shim
+   needs to be loaded before ZHA initializes the remote.
 4. Press a button: the device card (area assignable) shows the Action event
    entity updating, and the trigger list offers every button.
 
@@ -110,15 +119,18 @@ dim steps, colour-temperature steps and both favourite buttons.
 - **Value jitter**: colour values arrive as 254/255, 84/85, 169/170
   depending on the press; the integration normalises them into one action
   per button.
-- **Zones are not distinguishable**: the remote groupcasts every command to
-  the active zone's Zigbee group (32778/32779/32780), and those group ids do
-  not reach ZHA's event payload. This matches the Zigbee2MQTT limitation.
+- **Zones**: the zone buttons themselves transmit nothing over Zigbee (the
+  same is true in Zigbee2MQTT), so they cannot be normal triggers. The shim
+  instead reads the broadcast group (32778/32779/32780) of every command and
+  attaches a `zone` attribute (1-3) to each action, and emits a
+  `zone_selected` action whenever the zone changes. The zone switch becomes
+  visible on the next press after switching.
 - **Re-pairing survives**: actions are keyed on the remote's stable IEEE
   address. If the remote is removed and re-paired, keep the integration
   configured and it picks the remote up again.
 - Advanced use: every action is also published on the `eglo_remote_action`
-  bus event with `device_ieee`, the action name and any raw values
-  (`level`, `color_temperature`) for templating.
+  bus event with `device_ieee`, the action name, the `zone` and any raw
+  values (`level`, `color_temperature`) for templating.
 
 ## Local development
 

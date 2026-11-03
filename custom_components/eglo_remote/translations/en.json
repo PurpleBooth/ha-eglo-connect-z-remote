@@ -26,7 +26,8 @@
   "device_automation": {
     "trigger_type": {
       "button_short_press": "pressed",
-      "button_long_press": "held"
+      "button_long_press": "held",
+      "zone_selected": "selected"
     },
     "trigger_subtype": {
       "turn_on": "Turn on",
@@ -44,7 +45,14 @@
       "refresh": "Refresh (candle mode)",
       "color_cycle": "Color cycle",
       "group_1": "Group 1",
-      "group_2": "Group 2"
+      "group_2": "Group 2",
+      "zone": "Zone"
+    }
+  },
+  "issues": {
+    "shim_needs_restart": {
+      "title": "Restart Home Assistant to enable the colour and zone features",
+      "description": "The EGLO remote button shim was registered while Home Assistant's Zigbee stack was already running, so the remote is still working without it. Restart Home Assistant; the colour buttons, the refresh button and the zone attribute will then work. If the issue shows up again after a restart, restart once more."
     }
   }
 }

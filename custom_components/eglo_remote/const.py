@@ -25,7 +25,7 @@ CONF_MODEL = "model"
 CONF_SUBTYPE = "subtype"
 
 ATTR_DEVICE_IEEE = "device_ieee"
-ATTR_ACTION_GROUP = "action_group"
+ATTR_ZONE = "zone"
 ATTR_LEVEL = "level"
 ATTR_COLOR_TEMPERATURE = "color_temperature"
 

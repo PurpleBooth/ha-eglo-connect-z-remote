@@ -28,6 +28,10 @@ SUPPRESS_ON_WINDOW: Final = 0.5
 
 GESTURE_SHORT: Final = "short"
 GESTURE_LONG: Final = "long"
+GESTURE_ZONE: Final = "zone"
+
+# Command name the quirk shim emits for every decoded press.
+SHIM_COMMAND: Final = "eglo_action"
 
 
 @dataclass(frozen=True, slots=True)
@@ -68,6 +72,7 @@ ACTION_DEFINITIONS: Final[tuple[ActionDefinition, ...]] = (
     ActionDefinition("recall_1_long", GESTURE_LONG, "group_1"),
     ActionDefinition("recall_2", GESTURE_SHORT, "group_2"),
     ActionDefinition("recall_2_long", GESTURE_LONG, "group_2"),
+    ActionDefinition("zone_selected", GESTURE_ZONE, "zone"),
 )
 
 ACTION_NAMES: Final[frozenset[str]] = frozenset(
@@ -169,6 +174,21 @@ def translate_zha_event(
     action: str | None = None
     extra: dict[str, Any] = {}
 
+    if command == SHIM_COMMAND:
+        # Emitted by the quirk shim: fully decoded, args is the payload dict.
+        shim_args = args if isinstance(args, dict) else {}
+        shim_action = shim_args.get("action")
+        if shim_action not in ACTION_NAMES:
+            return None
+        payload: dict[str, Any] = {"action": shim_action}
+        zone = shim_args.get("zone")
+        if zone in (1, 2, 3):
+            payload["zone"] = zone
+        for key in ("level", "color_temperature"):
+            if shim_args.get(key) is not None:
+                payload[key] = shim_args[key]
+        return payload
+
     if cluster_id == CLUSTER_ON_OFF:
         if command == "on":
             if state.suppress_on():
@@ -254,6 +274,6 @@ def translate_zha_event(
     payload: dict[str, Any] = {"action": action}
     group_id = data.get("group_id")
     if isinstance(group_id, int) and group_id >= 32778:
-        payload["action_group"] = group_id - 32777
+        payload["zone"] = group_id - 32777
     payload.update(extra)
     return payload
