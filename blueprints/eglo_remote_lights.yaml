@@ -1,0 +1,165 @@
+blueprint:
+  name: EGLO connect.z remote lights
+  description: >-
+    Control a light with an EGLO connect.z Fernbedienung 2.0 (ZHA) using the
+    EGLO connect.z Remote integration. On/Off switch the light, the dim
+    buttons step brightness, the colour-temperature buttons step the white
+    tone, and the two favourite buttons can run any actions you like.
+    Long-press actions are intentionally not covered; add them as extra
+    triggers in the automation if you need them.
+  source_url: >-
+    https://tangled.org/billie.codes/ha-eglo-connect.z-smart-home-fernbedienung-2.0/blob/main/blueprints/eglo_remote_lights.yaml
+  domain: automation
+  author: billie.codes
+  input:
+    remote_entity:
+      name: Remote action entity
+      description: >-
+        The event entity created by the EGLO connect.z Remote integration,
+        for example event.eglo_connect_z_remote_416e_action.
+      selector:
+        entity:
+          filter:
+            domain: event
+            integration: eglo_remote
+    target_light:
+      name: Light
+      description: >-
+        The light to control. To control several lights at once, put them in
+        a group helper first and select that.
+      selector:
+        entity:
+          filter:
+            domain: light
+    brightness_step:
+      name: Brightness step size
+      default: 64
+      selector:
+        number:
+          min: 10
+          max: 255
+          step: 1
+          mode: box
+    kelvin_step:
+      name: Colour temperature step (Kelvin)
+      default: 500
+      selector:
+        number:
+          min: 100
+          max: 2000
+          step: 50
+          mode: box
+    favorite_1_actions:
+      name: Favourite 1 actions
+      description: Actions to run when favourite button 1 is pressed.
+      default: []
+      selector:
+        action:
+    favorite_2_actions:
+      name: Favourite 2 actions
+      description: Actions to run when favourite button 2 is pressed.
+      default: []
+      selector:
+        action:
+variables:
+  brightness_step: !input brightness_step
+  kelvin_step: !input kelvin_step
+  light: !input target_light
+  max_kelvin: "{{ state_attr(light, 'max_color_temp_kelvin') or 6500 }}"
+  min_kelvin: "{{ state_attr(light, 'min_color_temp_kelvin') or 2000 }}"
+triggers:
+  - trigger: event.received
+    target:
+      entity_id: !input remote_entity
+    options:
+      event_type:
+        - "on"
+        - "off"
+        - brightness_step_up
+        - brightness_step_down
+        - color_temperature_step_up
+        - color_temperature_step_down
+        - recall_1
+        - recall_2
+conditions: []
+actions:
+  - choose:
+      - conditions:
+          - condition: state
+            entity_id: !input remote_entity
+            attribute: event_type
+            state: "on"
+        sequence:
+          - action: light.turn_on
+            target:
+              entity_id: "{{ light }}"
+      - conditions:
+          - condition: state
+            entity_id: !input remote_entity
+            attribute: event_type
+            state: "off"
+        sequence:
+          - action: light.turn_off
+            target:
+              entity_id: "{{ light }}"
+      - conditions:
+          - condition: state
+            entity_id: !input remote_entity
+            attribute: event_type
+            state: brightness_step_up
+        sequence:
+          - action: light.turn_on
+            data:
+              brightness_step: "{{ brightness_step }}"
+            target:
+              entity_id: "{{ light }}"
+      - conditions:
+          - condition: state
+            entity_id: !input remote_entity
+            attribute: event_type
+            state: brightness_step_down
+        sequence:
+          - action: light.turn_on
+            data:
+              brightness_step: "{{ -brightness_step }}"
+            target:
+              entity_id: "{{ light }}"
+      - conditions:
+          - condition: state
+            entity_id: !input remote_entity
+            attribute: event_type
+            state: color_temperature_step_up
+        sequence:
+          - action: light.turn_on
+            data:
+              color_temp_kelvin: >-
+                {{ [(state_attr(light, 'color_temp_kelvin') or 4000) +
+                kelvin_step, max_kelvin] | min }}
+            target:
+              entity_id: "{{ light }}"
+      - conditions:
+          - condition: state
+            entity_id: !input remote_entity
+            attribute: event_type
+            state: color_temperature_step_down
+        sequence:
+          - action: light.turn_on
+            data:
+              color_temp_kelvin: >-
+                {{ [(state_attr(light, 'color_temp_kelvin') or 4000) -
+                kelvin_step, min_kelvin] | max }}
+            target:
+              entity_id: "{{ light }}"
+      - conditions:
+          - condition: state
+            entity_id: !input remote_entity
+            attribute: event_type
+            state: recall_1
+        sequence: !input favorite_1_actions
+      - conditions:
+          - condition: state
+            entity_id: !input remote_entity
+            attribute: event_type
+            state: recall_2
+        sequence: !input favorite_2_actions
+mode: single

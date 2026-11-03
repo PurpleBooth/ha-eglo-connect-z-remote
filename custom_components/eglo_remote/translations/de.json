@@ -1,0 +1,50 @@
+{
+  "title": "EGLO connect.z Fernbedienung",
+  "config": {
+    "step": {
+      "user": {
+        "title": "EGLO connect.z Fernbedienung hinzufügen",
+        "description": "Wähle die Fernbedienung aus, die mit der ZHA-Integration gekoppelt ist.",
+        "data": {
+          "device_id": "Fernbedienung"
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "Diese Fernbedienung ist bereits eingerichtet.",
+      "device_not_found": "Das ausgewählte Gerät wurde nicht gefunden.",
+      "no_supported_remotes": "Keine unterstützte EGLO connect.z Fernbedienung gefunden. Koppel die Fernbedienung zuerst mit der ZHA-Integration."
+    }
+  },
+  "entity": {
+    "event": {
+      "action": {
+        "name": "Aktion"
+      }
+    }
+  },
+  "device_automation": {
+    "trigger_type": {
+      "button_short_press": "gedrückt",
+      "button_long_press": "gedrückt halten"
+    },
+    "trigger_subtype": {
+      "turn_on": "Einschalten",
+      "turn_off": "Ausschalten",
+      "dim_up": "Heller",
+      "dim_down": "Dunkler",
+      "brightness_move": "Helligkeit plus/minus",
+      "color_temperature_up": "Farbtemperatur +",
+      "color_temperature_down": "Farbtemperatur −",
+      "color_temperature": "Farbtemperatur",
+      "red": "Rot",
+      "yellow": "Gelb",
+      "green": "Grün",
+      "blue": "Blau",
+      "refresh": "Refresh (Kerzenmodus)",
+      "color_cycle": "Farbwechsel",
+      "group_1": "Gruppe 1",
+      "group_2": "Gruppe 2"
+    }
+  }
+}

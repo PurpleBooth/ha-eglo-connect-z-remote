@@ -3,3 +3,4 @@ ha-long-lived-token
 __pycache__/
 *.pyc
 .pytest_cache/
+.github/

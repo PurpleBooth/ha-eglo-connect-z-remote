@@ -1,125 +1,153 @@
-# EGLO connect.z Fernbedienung 2.0 for Home Assistant (ZHA)
+# EGLO connect.z Remote for Home Assistant
 
-Native [ZHA](https://www.home-assistant.io/integrations/zha/) support for the
-**EGLO connect.z Smart Home Fernbedienung 2.0** (AwoX `ERCU_3groups_Zm`, also
-sold as **EGLO 99099** "3 groups remote controller").
+[EGLO connect.z Smart Home Fernbedienung 2.0](https://www.eglo.com/) (AwoX
+`ERCU_3groups_Zm`, also sold as EGLO 99099) paired with
+[ZHA](https://www.home-assistant.io/integrations/zha/) shows up as a plain
+Zigbee device with an Identify button, RSSI and LQI - and nothing else. It
+presses register internally, but Home Assistant offers **no triggers** for
+automations.
 
-Without this quirk the remote pairs into Home Assistant but is nearly useless:
-it shows up as a plain Zigbee device with only an *Identify* button and RSSI/LQI
-sensors — **no button entities and no device triggers**, so it cannot be used in
-any automation. This integration adds the missing [ZHA quirk](custom_components/eglo_connect_z_remote/quirk.py):
-every button press becomes a proper **device trigger** you can pick in the
-automation editor.
+This integration fixes that. It listens to the remote's Zigbee commands and
+exposes every button as:
 
-Works fully locally — no MQTT broker, no Zigbee2MQTT, no cloud.
+- a device trigger on the integration's device card (pick the device in the
+  automation editor and choose the button and gesture), and
+- an `event.*` entity (for example `event.eglo_connect_z_remote_416e_action`)
+  whose `event_type` is the pressed action - the recommended trigger style
+  for buttons since it can be renamed and survives re-pairing.
+
+Works fully locally. No MQTT broker, no Zigbee2MQTT, no cloud.
 
 ## Supported hardware
 
-| Check on the device page | Supported |
-| ------------------------ | --------- |
-| Manufacturer **AwoX**, Model **ERCU_3groups_Zm** | ✅ yes |
-| Manufacturer `_TZ3000_…`, Model **TS004F** | ❌ no (Tuya hardware — different device, different quirk) |
+| Device page shows                  | Supported |
+| ---------------------------------- | --------- |
+| Manufacturer **AwoX**, model **ERCU_3groups_Zm** (Fernbedienung 2.0) | yes |
+| Manufacturer **AwoX**, model **ERCU_Zm** (older remote)              | yes |
+| Anything else (for example Tuya `_TZ3000_`)                          | no  |
 
-Settings → Devices & services → ZHA → *this remote* → the manufacturer/model
-are on the device info card. The command map was validated against Zigbee2MQTT's
-`eglo99099` converter and the live device signature.
+Home Assistant 2024.8 or newer is required (event entities).
 
-## Installation (HACS)
+## Installation
 
-1. **Custom repository**: HACS → ⋮ → *Custom repositories* → add
-   `https://github.com/PurpleBooth/ha-eglo-connect-z-remote`
-   with category *Integration*.
-2. Install **EGLO connect.z Fernbedienung 2.0**, then **restart Home
-   Assistant**.
-3. Settings → Devices & services → *Add integration* → **EGLO connect.z
-   Fernbedienung 2.0** → Submit (just registers the quirk, nothing to fill in).
-4. If the remote was already paired: restart Home Assistant once more (or run
-   ZHA's *Reload quirks* action). **No re-pairing needed** — the quirk matches
-   the existing device signature.
-5. Open the remote's device page → ⋮ on an automation → the trigger list now
-   offers every button.
+1. HACS > the three-dot menu > **Custom repositories** > add
+   `https://github.com/PurpleBooth/ha-eglo-connect-z-remote` with category
+   **Integration**.
+2. Install **EGLO connect.z Remote**, then restart Home Assistant.
+3. Settings > Devices & services > **Add integration** > **EGLO connect.z
+   Remote** and pick your remote from the list. The remote must already be
+   paired with ZHA.
+4. Press a button: the device card (area assignable) shows the Action event
+   entity updating, and the trigger list offers every button.
+
+Removing the integration is equally clean: delete it in the UI and the
+device card and entity go with it. The ZHA device itself is never touched.
 
 ## Triggers
 
-| Button | Trigger (type / subtype) |
-| ------ | ------------------------ |
-| On | `remote_button_short_press` / `turn_on` |
-| Off | `remote_button_short_press` / `turn_off` |
-| 🔴 / 🟢 / 🔵 short | `remote_button_short_press` / `red`, `green`, `blue` |
-| 🔴 / 🟢 / 🔵 long | `remote_button_long_press` / `red_long`, `green_long`, `blue_long` |
-| Refresh (white) short / long | `refresh` / `refresh_long` |
-| Refresh coloured short / long | `refresh_colored` / `refresh_colored_long` |
-| Dim ▲ / ▼ short | `remote_button_short_press` / `dim_up`, `dim_down` |
-| Dim ▲ / ▼ long | `remote_button_long_press` / `dim_up`, `dim_down` |
-| Colour temp cold / warm short | `remote_button_short_press` / `color_temp_cold`, `color_temp_warm` |
-| Colour temp cold / warm long | `remote_button_long_press` / `color_temp_cold`, `color_temp_warm` |
-| ♥ 1 / ♥ 2 short | `remote_button_short_press` / `favorite_1`, `favorite_2` |
-| ♥ 1 / ♥ 2 long | `remote_button_long_press` / `favorite_1`, `favorite_2` |
+| Button                    | Action (`event_type` / device trigger subtype) |
+| ------------------------- | ---------------------------------------------- |
+| On                        | `on`                                           |
+| Off                       | `off`                                          |
+| Dim up / down (short)     | `brightness_step_up` / `brightness_step_down`  |
+| Dim up / down (held)      | `brightness_move_to_level` (carries `level`)   |
+| Colour temp (short)       | `color_temperature_step_up` / `_down`          |
+| Colour temp (held)        | `color_temperature_move` (carries `color_temperature` in mireds) |
+| Red / green / blue (short)| `red` / `green` / `blue`                       |
+| Red / green / blue (held) | `red_long` / `green_long` / `blue_long`        |
+| Yellow (short)            | `yellow`                                       |
+| Refresh, candle (short/long) | `refresh` / `refresh_long`                  |
+| Colour cycle (short/long) | `refresh_colored` / `refresh_colored_long`     |
+| Favourite 1 / 2 (short)   | `recall_1` / `recall_2`                        |
+| Favourite 1 / 2 (held)    | `recall_1_long` / `recall_2_long`              |
 
-### Quirks handled for you
+The trigger list in the automation editor shows these as gestures, for
+example "Turn on pressed" or "Group 2 held" (`Turn on` maps to `on`).
 
-- **Spurious "On"** — the hardware fires an extra `on` right after the colour,
-  refresh and colour-temperature buttons; the quirk suppresses it (same as
-  Zigbee2MQTT).
-- **Value jitter** — colour hues arrive as 254/255, 84/85, 169/170 depending on
-  the press; events are normalised so one trigger per button is enough.
-- The raw Zigbee parameters (levels, mireds, colour values) are still included
-  in the `zha_event` payload for advanced templating.
-
-### Persistent triggers (survive re-pairing)
-
-Device triggers are keyed on the device id, which changes if the remote is ever
-removed and re-paired. For hand-written automations you can trigger on the
-`zha_event` bus with the remote's **IEEE address** instead — it survives
-re-pairing (this is also the recommended ZHA pattern in Home Assistant's
-[best practices](.agents/skills/home-assistant-best-practices/references/device-control.md)):
+### Example automation
 
 ```yaml
 triggers:
-  - trigger: event
-    event_type: zha_event
-    event_data:
-      device_ieee: "a4:c1:38:19:fb:cd:41:6e"  # your remote's IEEE
-      command: "recall_1"
-actions:
-  - action: scene.turn_on
+  - trigger: event.received
     target:
-      entity_id: scene.goodnight
+      entity_id: event.eglo_connect_z_remote_416e_action
+    options:
+      event_type:
+        - "on"
+        - "off"
+actions:
+  - choose:
+      - conditions:
+          - condition: state
+            entity_id: event.eglo_connect_z_remote_416e_action
+            attribute: event_type
+            state: "on"
+        sequence:
+          - action: light.turn_on
+            target:
+              entity_id: light.my_lamp
+      - conditions:
+          - condition: state
+            entity_id: event.eglo_connect_z_remote_416e_action
+            attribute: event_type
+            state: "off"
+        sequence:
+          - action: light.turn_off
+            target:
+              entity_id: light.my_lamp
 ```
 
-Every canonical `command` value is listed in the trigger table above
-(`on`, `off`, `red`, `red_long`, … `recall_2_long`).
+Or import the ready-made
+[light blueprint](blueprints/eglo_remote_lights.yaml) which covers On/Off,
+dim steps, colour-temperature steps and both favourite buttons.
 
-### Zones (group buttons 1/2/3)
+## Behaviour notes
 
-The zone buttons send nothing over Zigbee — the remote instead broadcasts every
-command to the active zone's Zigbee group (32778/32779/32780), and Zigbee group
-ids are not part of ZHA's event payload. Triggers therefore cannot distinguish
-zones. This matches Zigbee2MQTT's documented limitation; Z2M additionally
-exposes `action_group` only because it reads the raw group id from MQTT.
-
-## Blueprint
-
-Import [`blueprints/eglo_connect_z_remote_lights.yaml`](blueprints/eglo_connect_z_remote_lights.yaml)
-for a ready-made lighting automation: On/Off targets, dim stepping, Refresh =
-100 % warm white, and optional actions for the two favourite buttons.
+- **Spurious "On"**: the hardware emits an extra `on` right after colour,
+  colour-temperature, refresh and favourite presses. The integration
+  suppresses it (within 0.5 s) the same way Zigbee2MQTT does, so automations
+  do not fire twice.
+- **Value jitter**: colour values arrive as 254/255, 84/85, 169/170
+  depending on the press; the integration normalises them into one action
+  per button.
+- **Zones are not distinguishable**: the remote groupcasts every command to
+  the active zone's Zigbee group (32778/32779/32780), and those group ids do
+  not reach ZHA's event payload. This matches the Zigbee2MQTT limitation.
+- **Re-pairing survives**: actions are keyed on the remote's stable IEEE
+  address. If the remote is removed and re-paired, keep the integration
+  configured and it picks the remote up again.
+- Advanced use: every action is also published on the `eglo_remote_action`
+  bus event with `device_ieee`, the action name and any raw values
+  (`level`, `color_temperature`) for templating.
 
 ## Local development
 
 ```sh
 python3 -m venv .venv
-.venv/bin/pip install zigpy zha-quirks pytest
+.venv/bin/pip install -r requirements_test.txt
+.venv/bin/ruff format custom_components/ tests/
+.venv/bin/ruff check custom_components/ tests/
 .venv/bin/pytest tests/
 ```
 
-The test suite builds a device from the remote's real ZHA signature, applies
-the quirk, and simulates every button press with the observed ZCL frames.
+The tests run against the pinned Home Assistant test harness and cover the
+command translation (from live captures of the real remote), the config
+flow, setup and unload, the event entity, and the device trigger platform.
 
 ## References
 
-- [HA community: listening for button presses on this remote](https://community.home-assistant.io/t/how-to-listen-for-button-presses-on-zigbee-remote-control/722016)
-- [Zigbee2MQTT EGLO 99099](https://www.zigbee2mqtt.io/devices/99099.html)
-- [Local custom ZHA quirks guide](https://community.home-assistant.io/t/zigbee-guide-how-to-add-setup-local-custom-zha-device-handlers-also-known-as-quirks-in-the-zha-integration/683473)
+- [Zigbee2MQTT EGLO 99099 device page](https://www.zigbee2mqtt.io/devices/99099.html) -
+  the command map in this integration was cross-checked against its converter
+- [Z2M issue #16890: EGLO RCU3](https://github.com/Koenkk/zigbee2mqtt/issues/16890) -
+  captured Zigbee traffic of this exact remote
+- [Local custom ZHA quirks guide](https://community.home-assistant.io/t/zigbee-guide-how-to-add-setup-local-custom-zha-device-handlers-also-known-as-quirks-in-the-zha-integration/683473) -
+  the alternative quirk-based approach, documented here for reference
+
+## Support and contributing
+
+Bugs and feature requests go to the
+[issue tracker](https://tangled.org/billie.codes/ha-eglo-connect.z-smart-home-fernbedienung-2.0/issues).
+Pull requests are welcome; run the tests and ruff before submitting.
 
 ## License
 

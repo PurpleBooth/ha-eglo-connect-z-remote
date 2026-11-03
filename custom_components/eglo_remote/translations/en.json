@@ -1,0 +1,50 @@
+{
+  "title": "EGLO connect.z Remote",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Add an EGLO connect.z remote",
+        "description": "Pick the remote that is paired with the ZHA integration.",
+        "data": {
+          "device_id": "Remote"
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "This remote is already configured.",
+      "device_not_found": "The selected device could not be found.",
+      "no_supported_remotes": "No supported EGLO connect.z remote found. Pair the remote with the ZHA integration first."
+    }
+  },
+  "entity": {
+    "event": {
+      "action": {
+        "name": "Action"
+      }
+    }
+  },
+  "device_automation": {
+    "trigger_type": {
+      "button_short_press": "pressed",
+      "button_long_press": "held"
+    },
+    "trigger_subtype": {
+      "turn_on": "Turn on",
+      "turn_off": "Turn off",
+      "dim_up": "Brightness up",
+      "dim_down": "Brightness down",
+      "brightness_move": "Brightness up/down",
+      "color_temperature_up": "Color temperature up",
+      "color_temperature_down": "Color temperature down",
+      "color_temperature": "Color temperature",
+      "red": "Red",
+      "yellow": "Yellow",
+      "green": "Green",
+      "blue": "Blue",
+      "refresh": "Refresh (candle mode)",
+      "color_cycle": "Color cycle",
+      "group_1": "Group 1",
+      "group_2": "Group 2"
+    }
+  }
+}
