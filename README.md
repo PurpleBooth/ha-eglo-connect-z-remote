@@ -165,4 +165,4 @@ Pull requests are welcome; run the tests and ruff before submitting.
 
 ## License
 
-[MIT](LICENSE)
+[Unlicense](UNLICENSE) — released into the public domain
