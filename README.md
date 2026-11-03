@@ -2,8 +2,8 @@
 
 <img src="custom_components/eglo_remote/brand/icon@2x.png" width="96" align="right" alt="EGLO connect.z Remote icon">
 
-[EGLO connect.z Smart Home Fernbedienung 2.0](https://www.eglo.com/) (AwoX
-`ERCU_3groups_Zm`, also sold as EGLO 99099) paired with
+[EGLO connect.z Smart Home Fernbedienung 2.0](https://www.eglo.com/de/fernbedienung-connect-z-remote-99099.html)
+(AwoX `ERCU_3groups_Zm`, also sold as EGLO 99099) paired with
 [ZHA](https://www.home-assistant.io/integrations/zha/) shows up as a plain
 Zigbee device with an Identify button, RSSI and LQI - and nothing else. It
 presses register internally, but Home Assistant offers **no triggers** for
