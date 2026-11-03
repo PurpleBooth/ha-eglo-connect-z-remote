@@ -5,10 +5,10 @@
     "@PurpleBooth"
   ],
   "config_flow": true,
-  "documentation": "https://tangled.org/billie.codes/ha-eglo-connect.z-smart-home-fernbedienung-2.0",
+  "documentation": "https://github.com/PurpleBooth/ha-eglo-connect-z-remote",
   "integration_type": "device",
   "iot_class": "local_push",
-  "issue_tracker": "https://tangled.org/billie.codes/ha-eglo-connect.z-smart-home-fernbedienung-2.0/issues",
+  "issue_tracker": "https://github.com/PurpleBooth/ha-eglo-connect-z-remote/issues",
   "requirements": [],
   "version": "0.2.2"
 }

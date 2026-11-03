@@ -7,8 +7,7 @@ blueprint:
     tone, and the two favourite buttons can run any actions you like.
     Long-press actions are intentionally not covered; add them as extra
     triggers in the automation if you need them.
-  source_url: >-
-    https://tangled.org/billie.codes/ha-eglo-connect.z-smart-home-fernbedienung-2.0/blob/main/blueprints/eglo_remote_lights.yaml
+  source_url: https://github.com/PurpleBooth/ha-eglo-connect-z-remote/blob/main/blueprints/eglo_remote_lights.yaml
   domain: automation
   author: billie.codes
   input:

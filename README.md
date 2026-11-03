@@ -160,7 +160,7 @@ flow, setup and unload, the event entity, and the device trigger platform.
 ## Support and contributing
 
 Bugs and feature requests go to the
-[issue tracker](https://tangled.org/billie.codes/ha-eglo-connect.z-smart-home-fernbedienung-2.0/issues).
+[issue tracker](https://github.com/PurpleBooth/ha-eglo-connect-z-remote/issues).
 Pull requests are welcome; run the tests and ruff before submitting.
 
 ## License
