@@ -5,14 +5,17 @@ blueprint:
     ERCU_3groups_Zm / EGLO 99099) using ZHA device triggers.
 
     On = on, Off = off, short dim presses step brightness, long dim presses
-    dim up/down fully, Refresh sets 100% white, Favourite 1/2 run optional
-    automations.
+    dim up/down fully, Refresh sets 100 % warm white, Favourite 1/2 run
+    optional actions.
 
     Buttons not covered here (colours, colour temperature, Refresh coloured,
     long favourites) can be used as normal device triggers in any automation —
     the remote's trigger list provides them.
   domain: automation
   author: Billie
+  source_url: https://raw.githubusercontent.com/PurpleBooth/ha-eglo-connect.z-smart-home-fernbedienung-2.0/main/blueprints/eglo_connect_z_remote_lights.yaml
+  homeassistant:
+    min_version: "2024.10.0"
   input:
     remote:
       name: Remote control
@@ -24,62 +27,79 @@ blueprint:
               manufacturer: AwoX
               model: ERCU_3groups_Zm
           multiple: false
-    turn_on_target:
-      name: Turn on
-      description: Lights controlled by the On button.
-      default: {}
-      selector:
-        target:
-          entity:
-            domain: light
-    turn_off_target:
-      name: Turn off
-      description: Lights controlled by the Off button.
-      default: {}
-      selector:
-        target:
-          entity:
-            domain: light
-    dim_target:
-      name: Dimming
-      description: Lights controlled by the dim buttons.
-      default: {}
-      selector:
-        target:
-          entity:
-            domain: light
-    brightness_step:
-      name: Brightness step
-      description: Percentage added/removed by a short dim press.
-      default: 20
-      selector:
-        number:
-          min: 1
-          max: 50
-          unit_of_measurement: "%"
-    refresh_target:
-      name: Refresh button
-      description: Lights set to full brightness by the Refresh button.
-      default: {}
-      selector:
-        target:
-          entity:
-            domain: light
-    favorite_1_action:
-      name: Favourite 1
-      description: Optional actions for a short press of Favourite 1.
-      default: []
-      selector:
-        action:
-    favorite_2_action:
-      name: Favourite 2
-      description: Optional actions for a short press of Favourite 2.
-      default: []
-      selector:
-        action:
+    lights:
+      name: Lights
+      icon: mdi:lightbulb-group
+      input:
+        turn_on_target:
+          name: Turn on
+          description: Lights controlled by the On button.
+          default: {}
+          selector:
+            target:
+              entity:
+                domain: light
+        turn_off_target:
+          name: Turn off
+          description: Lights controlled by the Off button.
+          default: {}
+          selector:
+            target:
+              entity:
+                domain: light
+        dim_target:
+          name: Dimming
+          description: Lights controlled by the dim buttons.
+          default: {}
+          selector:
+            target:
+              entity:
+                domain: light
+        refresh_target:
+          name: Refresh button
+          description: Lights set to full brightness by the Refresh button.
+          default: {}
+          selector:
+            target:
+              entity:
+                domain: light
+    actions:
+      name: Favourite buttons
+      icon: mdi:star-four-points
+      collapsed: true
+      input:
+        favorite_1_action:
+          name: Favourite 1
+          description: Optional actions for a short press of Favourite 1.
+          default: []
+          selector:
+            action:
+        favorite_2_action:
+          name: Favourite 2
+          description: Optional actions for a short press of Favourite 2.
+          default: []
+          selector:
+            action:
+    settings:
+      name: Settings
+      icon: mdi:cog
+      collapsed: true
+      input:
+        brightness_step:
+          name: Brightness step
+          description: Percentage added/removed by a short dim press.
+          default: 20
+          selector:
+            number:
+              min: 1
+              max: 50
+              unit_of_measurement: "%"
 
 mode: single
 max_exceeded: silent
+
+variables:
+  brightness_step: !input brightness_step
 
 triggers:
   - platform: device
@@ -158,7 +178,7 @@ actions:
           - action: light.turn_on
             target: !input dim_target
             data:
-              brightness_step_pct: !input brightness_step
+              brightness_step_pct: "{{ brightness_step }}"
       - conditions:
           - condition: trigger
             id: dim_down_step

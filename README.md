@@ -66,6 +66,30 @@ are on the device info card. The command map was validated against Zigbee2MQTT's
 - The raw Zigbee parameters (levels, mireds, colour values) are still included
   in the `zha_event` payload for advanced templating.
 
+### Persistent triggers (survive re-pairing)
+
+Device triggers are keyed on the device id, which changes if the remote is ever
+removed and re-paired. For hand-written automations you can trigger on the
+`zha_event` bus with the remote's **IEEE address** instead — it survives
+re-pairing (this is also the recommended ZHA pattern in Home Assistant's
+[best practices](.agents/skills/home-assistant-best-practices/references/device-control.md)):
+
+```yaml
+triggers:
+  - trigger: event
+    event_type: zha_event
+    event_data:
+      device_ieee: "a4:c1:38:19:fb:cd:41:6e"  # your remote's IEEE
+      command: "recall_1"
+actions:
+  - action: scene.turn_on
+    target:
+      entity_id: scene.goodnight
+```
+
+Every canonical `command` value is listed in the trigger table above
+(`on`, `off`, `red`, `red_long`, … `recall_2_long`).
+
 ### Zones (group buttons 1/2/3)
 
 The zone buttons send nothing over Zigbee — the remote instead broadcasts every
